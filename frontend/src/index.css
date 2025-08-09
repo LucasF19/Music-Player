@@ -19,6 +19,7 @@ body {
   border-radius: 9999px;
   background: #8D8D8D;
   cursor: pointer;
+  transition: background 0.3s ease;
 }
 
 .inputRange::-webkit-slider-thumb {
@@ -38,4 +39,13 @@ body {
   border-radius: 999px;
   background: #d9d9d9;
   box-shadow: none;
+}
+
+@keyframes spin-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spin-slow {
+  animation: spin-slow 20s linear infinite;
 }

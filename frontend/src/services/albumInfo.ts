@@ -19,3 +19,13 @@ export async function searchSong(query: string) {
 		throw error;
 	}
 }
+
+export async function getLyrics(nameSong: string) {
+	try {
+		const response = await axios.get("http://localhost:3001/api/lyrics", { params: { nameSong } });
+		return response.data;
+	} catch (error) {
+		console.error("Error fetching lyrics:", error);
+		throw error;
+	}
+}

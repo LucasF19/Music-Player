@@ -1,13 +1,24 @@
 import { useEffect, useState, useRef } from "react";
 import ReactPlayer from "react-player/youtube";
-import { AudioLines, Heart, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1, Volume2 } from "lucide-react";
+import { Heart, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1, Volume2 } from "lucide-react";
 import { lyricsMusic } from "./assets/lyrics.js"
 import { formatTime, parseTimeToSeconds } from "./utils/formatTime.js";
-import { fetchSongDetails, searchSong } from "./services/albumInfo.js";
+import { fetchSongDetails, getLyrics, searchSong } from "./services/albumInfo.js";
 import { isDarkColor, lightenColor } from "./utils/colorContrast.js";
 
+const personalized = {
+  title: "Can't Love You Anymore (With OHHYUK)",
+  color: "",
+  albumName: "Palette",
+  artistName: "IU, OHHYUK",
+  customLyrics: true,
+  showFilter: false,
+  delay: 0,
+  backgroundImage: "https://images.unsplash.com/photo-1519692933481-e162a57d6721?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+}
+
 export default function App() {
-  const idGenius = "5827731";
+  const idGenius = "4033721";
 
   const [lyrics, setLyrics] = useState([] as any);
   const [musicDetails, setMusicDetails] = useState<any>(null);
@@ -26,8 +37,10 @@ export default function App() {
   const fetchAlbumInfo = async (idSong?: string) => {
     try {
       const albumInfo = await fetchSongDetails(idSong ?? idGenius);
+
+      fetchLyrics(albumInfo.title, albumInfo.artist);
       setMusicDetails(albumInfo);
-      setDetailsColor(isDarkColor(albumInfo.primaryColor) ? lightenColor(albumInfo.primaryColor) : albumInfo.primaryColor);
+      setDetailsColor(personalized.color ? personalized.color : isDarkColor(albumInfo.primaryColor) ? lightenColor(albumInfo.primaryColor) : albumInfo.primaryColor);
     } catch (err) {
       console.error("Erro ao buscar letras:", err);
     }
@@ -48,10 +61,12 @@ export default function App() {
     setSearchResults([]);
   }
 
-  const fetchLyrics = async () => {
-    const parsedLyrics = lyricsMusic.map((line: any) => ({
+  const fetchLyrics = async (title: string, artist: string) => {
+    const response = personalized.customLyrics ? lyricsMusic : await getLyrics(`${title} ${artist}`);
+
+    const parsedLyrics = response.map((line: any) => ({
       ...line,
-      time: parseTimeToSeconds(line.time),
+      time: parseTimeToSeconds(line.time) + personalized.delay,
     }));
 
     setLyrics(parsedLyrics);
@@ -95,67 +110,70 @@ export default function App() {
 
 
   useEffect(() => {
-    fetchLyrics();
     fetchAlbumInfo();
   }, []);
 
   return (
     <div className="relative h-[100vh] w-full flex items-center justify-center">
-      <div className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1557938615-3e9e68aff5c4?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')` }} />
+      <div className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url('${personalized.backgroundImage}')` }} />
 
-      <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-sm" />
+      <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-[5px]" />
+
+      {
+        personalized.showFilter && (
+          <div className="absolute z-50 w-[450px] bg-[#2b2b2b] rounded-[10px] left-0 top-0 m-6">
+            <input
+              type="text"
+              value={query}
+              id="search-input"
+              onChange={(e) => {
+                setQuery(e.target.value);
+                handleSearch(e.target.value);
+              }}
+              placeholder="Buscar música..."
+              className="w-full px-6 py-2 rounded-lg text-white"
+            />
+
+            <div className="mt-2 w-[450px] overflow-hidden scroll-smooth max-h-[250px] overflow-y-auto bg-[#252525] rounded-[15px] shadow-lg absolute z-20">
+              {searchResults.map((result: any) => {
+                const song = result.result;
+                return (
+                  <div
+                    key={song.id}
+                    onClick={() => selectedSong(song.id)}
+                    className="flex items-center gap-3 p-2 hover:bg-gray-200 cursor-pointer"
+                  >
+                    <img src={song.song_art_image_thumbnail_url} alt={song.title} className="w-10 h-10 rounded" />
+                    <div className="text-sm">
+                      <p className="font-bold">{song.title}</p>
+                      <p className="text-gray-500">{song.primary_artist.name}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )
+      }
 
       <div className="relative z-20 scale-[1.6]">
-        {/* <div className="w-[450px] mb-6 bg-[#2b2b2b] rounded-full">
-          <input
-            type="text"
-            value={query}
-            id="search-input"
-            onChange={(e) => {
-              setQuery(e.target.value);
-              handleSearch(e.target.value);
-            }}
-            placeholder="Buscar música..."
-            className="w-full px-6 py-2 rounded-lg text-white"
-          />
-
-          <div className="mt-2 w-[450px] overflow-hidden scroll-smooth max-h-[250px] overflow-y-auto bg-[#252525] rounded-[15px] shadow-lg absolute z-20">
-            {searchResults.map((result: any) => {
-              const song = result.result;
-              return (
-                <div
-                  key={song.id}
-                  onClick={() => selectedSong(song.id)}
-                  className="flex items-center gap-3 p-2 hover:bg-gray-200 cursor-pointer"
-                >
-                  <img src={song.song_art_image_thumbnail_url} alt={song.title} className="w-10 h-10 rounded" />
-                  <div className="text-sm">
-                    <p className="font-bold">{song.title}</p>
-                    <p className="text-gray-500">{song.primary_artist.name}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div> */}
-
-        <div className="w-[450px] backdrop-blur-sm bg-[#101010db]/80 px-[25px] py-[22px] rounded-[20px]">
+        <div className="w-[450px] backdrop-blur-sm bg-[#060606]/60 px-[25px] py-[22px] rounded-[20px]">
           <div className="flex justify-center items-center bg-[#6f6f6f]/20 rounded-[10px] py-1.5 mb-[15px] bg-opacity-[15%]">
             <span
               className={`h-[17px] font-bold text-sm text-shadow-[0px_0px_8px_#67a9ff59]`}
               style={{ color: detailsColor }}
             >
-              {musicDetails?.album?.name} • {musicDetails?.releaseDate.split(", ")[1]}
+              {personalized.albumName ? personalized.albumName : musicDetails?.album?.name} • {musicDetails?.releaseDate.split(", ")[1]}
             </span>
           </div>
 
-          <div className="relative overflow-hidden h-[450px] rounded-[15px]">
+          <div className="relative overflow-hidden h-[450px] rounded-[15px]" style={{ boxShadow: `0px 0px 20px ${detailsColor}19` }}>
 
             <div className="bg-black w-full h-full z-10">
-              <div className="absolute top-0 left-0 w-full h-full scale-[2] origin-center opacity-30">
+              <div className="absolute top-0 left-0 w-full h-full scale-[2.7] origin-center opacity-40">
                 <ReactPlayer
                   ref={playerRef}
-                  url={musicDetails?.url}
+                  url={"https://www.youtube.com/watch?v=E9HV6jh6qt0"}
                   playing={playing}
                   controls={false}
                   volume={volume}
@@ -175,8 +193,7 @@ export default function App() {
                 />
               </div>
 
-              <div className="absolute inset-0 z-10 backdrop-blur-[8px]" />
-
+              <div className="absolute inset-0 z-10 backdrop-blur-[3px]" />
             </div>
 
 
@@ -185,14 +202,14 @@ export default function App() {
                 <div
                   className="transition-transform duration-500 ease-in-out flex flex-col items-center gap-[3px]"
                 >
-                  {playedSeconds >= lyrics[0]?.time && [currentIndex - 1, currentIndex, currentIndex + 1].map((i, idx) => {
+                  {playedSeconds >= lyrics[0]?.time && [currentIndex - 1, currentIndex, currentIndex + 1].map((i, _) => {
                     const line = lyrics[i];
                     return (
                       <div
                         key={i}
-                        className={`flex items-center justify-center text-center transition-all duration-300 text-[17px] ${i === currentIndex
+                        className={`flex relative items-center justify-center text-center transition-all duration-500 text-[20px] ${i === currentIndex
                           ? "font-semibold text-white text-shadow-[0px_0px_10px_#fff]"
-                          : "text-[#999] scale-[0.8] max-h-[48px]"
+                          : "text-[#808080bd] font-normal scale-[0.8] max-h-[48px]"
                           }`}
                       >
                         {line?.text || ""}
@@ -207,17 +224,15 @@ export default function App() {
 
           <div className="flex justify-between items-center mt-2">
             <div>
-              <div className="flex items-center relative">
-                <h3 className="text-[35px] font-bold">{musicDetails?.title?.split(" ").slice(0, 3).join(" ")}</h3>
-                <Heart className={`h-[20px] ml-[5px] z-20`} style={{ color: detailsColor, fill: detailsColor }}></Heart>
-              </div>
+              <h3 className="w-[270px] text-[35px] font-bold relative leading-[35px] truncate mt-3">{personalized.title ? personalized.title : musicDetails?.title?.split(" ").slice(0, 3).join(" ")}</h3>
 
-              <p className={`text-[15px] font-semibold mt-[-14px]`} style={{ color: detailsColor }}>{musicDetails?.artist}</p>
+              <div className="flex items-center relative">
+                <p className={`text-[15px] font-semibold`} style={{ color: detailsColor }}>{personalized.artistName ? personalized.artistName : musicDetails?.artist}</p>
+                <Heart className="h-[15px] ml-1" style={{ fill: detailsColor, color: detailsColor }} />
+              </div>
             </div>
 
             <div className="flex items-center">
-              <AudioLines className="h-[25px] w-[25px] mr-5" />
-
               <div className="flex items-center gap-2 bg-[#6f6f6f]/15 rounded-full px-5 py-[3px]">
                 <img className="w-[10px]" src="/icons/bluetooth.png" alt="bluetooth icon" />
                 <span className="text-[#E8E8E8] font-thin text-[12px] mt-1">LM02</span>

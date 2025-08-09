@@ -32,6 +32,18 @@ app.post("/api/search-song", async (req, res) => {
   }
 });
 
+app.get("/api/lyrics", async (req, res) => {
+  const { nameSong } = req.query;
+
+  try {
+    const lyrics = await fetchLrcLyrics(nameSong);
+    res.json(lyrics);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao buscar letra sincronizada." });
+  }
+});
+
 
 async function fetchGeniusApi(query) {
   const headers = {
@@ -66,6 +78,35 @@ async function searchSong(query) {
   );
 
   return searchDetails.data?.response;
+}
+
+async function fetchLrcLyrics(nameSong) {
+  const searchUrl = `https://lrclib.net/api/search?q=${encodeURIComponent(nameSong)}&timestamp=true`;
+  const searchRes = await axios.get(searchUrl);
+
+  const firstMatch = searchRes.data[0];
+  if (!firstMatch?.syncedLyrics) {
+    throw new Error("Letra sincronizada não encontrada.");
+  }
+
+  return parseLRC(firstMatch.syncedLyrics);
+}
+
+function parseLRC(lrcText) {
+  const lines = lrcText.split("\n");
+  const result = [];
+
+  for (const line of lines) {
+    const match = line.match(/\[(\d{2}:\d{2}\.\d{2})\](.*)/);
+    if (match) {
+      result.push({
+        time: match[1],
+        text: match[2].trim(),
+      });
+    }
+  }
+
+  return result;
 }
 
 const PORT = 3001;
