@@ -7,19 +7,21 @@ import { fetchSongDetails, getLyrics, searchSong } from "./services/albumInfo.js
 import { isDarkColor, lightenColor } from "./utils/colorContrast.js";
 
 const personalized = {
-  title: "Can't Love You Anymore (With OHHYUK)",
+  id: "9249219",
+  title: "",
   color: "",
-  albumName: "Palette",
-  artistName: "IU, OHHYUK",
-  customLyrics: true,
+  albumName: "",
+  artistName: "",
+  customLyrics: false,
   showFilter: false,
-  delay: 0,
-  backgroundImage: "https://images.unsplash.com/photo-1519692933481-e162a57d6721?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  delay: 41,
+  backgroundImage: "",
+  isCustomVideo: false,
+  customVideoUrl: "",
+  videoStart: 0,
 }
 
 export default function App() {
-  const idGenius = "4033721";
-
   const [lyrics, setLyrics] = useState([] as any);
   const [musicDetails, setMusicDetails] = useState<any>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -36,7 +38,7 @@ export default function App() {
 
   const fetchAlbumInfo = async (idSong?: string) => {
     try {
-      const albumInfo = await fetchSongDetails(idSong ?? idGenius);
+      const albumInfo = await fetchSongDetails(idSong ?? personalized.id);
 
       fetchLyrics(albumInfo.title, albumInfo.artist);
       setMusicDetails(albumInfo);
@@ -115,10 +117,9 @@ export default function App() {
 
   return (
     <div className="relative h-[100vh] w-full flex items-center justify-center">
-      <div className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url('${personalized.backgroundImage}')` }} />
+      <div className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url('${personalized.backgroundImage ? personalized.backgroundImage : musicDetails?.albumThumb}')` }} />
 
-      <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-[5px]" />
-
+      <div className="absolute inset-0 z-10 bg-black/80 backdrop-blur-md" />
       {
         personalized.showFilter && (
           <div className="absolute z-50 w-[450px] bg-[#2b2b2b] rounded-[10px] left-0 top-0 m-6">
@@ -157,8 +158,8 @@ export default function App() {
       }
 
       <div className="relative z-20 scale-[1.6]">
-        <div className="w-[450px] backdrop-blur-sm bg-[#060606]/60 px-[25px] py-[22px] rounded-[20px]">
-          <div className="flex justify-center items-center bg-[#6f6f6f]/20 rounded-[10px] py-1.5 mb-[15px] bg-opacity-[15%]">
+        <div className="w-[450px] backdrop-blur-md bg-[#171717d4] px-[25px] py-[22px] rounded-[20px]">
+          <div className="flex justify-center items-center bg-[#6f6f6f]/15 rounded-[15px] py-1.5 mb-[15px] bg-opacity-[15%]">
             <span
               className={`h-[17px] font-bold text-sm text-shadow-[0px_0px_8px_#67a9ff59]`}
               style={{ color: detailsColor }}
@@ -170,47 +171,66 @@ export default function App() {
           <div className="relative overflow-hidden h-[450px] rounded-[15px]" style={{ boxShadow: `0px 0px 20px ${detailsColor}19` }}>
 
             <div className="bg-black w-full h-full z-10">
-              <div className="absolute top-0 left-0 w-full h-full scale-[2.7] origin-center opacity-40">
-                <ReactPlayer
-                  ref={playerRef}
-                  url={"https://www.youtube.com/watch?v=E9HV6jh6qt0"}
-                  playing={playing}
-                  controls={false}
-                  volume={volume}
-                  progressInterval={100}
-                  width="100%"
-                  height="100%"
-                  onProgress={handleProgress}
-                  onDuration={(dur) => setDuration(dur)}
-                  config={{
-                    playerVars: {
-                      autoplay: 0,
-                      modestbranding: 0,
-                      controls: 0,
-                      rel: 0,
-                    }
-                  }}
-                />
-              </div>
+              <div className="absolute top-0 left-0 w-full h-full scale-[2.3] origin-center opacity-40">
+                 <ReactPlayer
+                    ref={playerRef}
+                    url={musicDetails?.url}
+                    playing={playing}
+                    controls={false}
+                    volume={volume}
+                    progressInterval={100}
+                    width="100%"
+                    height="100%"
+                    onProgress={handleProgress}
+                    onDuration={(dur) => setDuration(dur)}
+                    config={{
+                      playerVars: {
+                        autoplay: 0,
+                        modestbranding: 0,
+                        controls: 0,
+                        rel: 0,
+                      }
+                    }}
+                    className={personalized.isCustomVideo ? "hidden" : ""}
+                  />
 
+                  {
+                    personalized.isCustomVideo && (
+                      <ReactPlayer
+                        playing={playing}
+                        url={personalized.customVideoUrl}
+                        muted={true}
+                        width="100%"
+                        height="100%"
+                        config={{
+                          playerVars: {
+                            start: personalized.videoStart,
+                          }
+                        }}
+                      />
+                    )
+                  }
+              </div>
               <div className="absolute inset-0 z-10 backdrop-blur-[3px]" />
             </div>
 
 
-            <div className="absolute inset-0 z-20 px-6 overflow-visible flex items-center justify-center">
-              <div className="h-full w-full overflow-hidden relative flex items-center justify-center">
+            <div className="absolute inset-0 z-20 overflow-visible flex items-center justify-center">
+              <div className="h-full w-full overflow-visible relative flex items-center justify-center">
                 <div
-                  className="transition-transform duration-500 ease-in-out flex flex-col items-center gap-[3px]"
+                  className="transition-transform ease-in-out flex flex-col items-center gap-[3px] w-[310px]"
                 >
                   {playedSeconds >= lyrics[0]?.time && [currentIndex - 1, currentIndex, currentIndex + 1].map((i, _) => {
                     const line = lyrics[i];
+
                     return (
                       <div
                         key={i}
-                        className={`flex relative items-center justify-center text-center transition-all duration-500 text-[20px] ${i === currentIndex
-                          ? "font-semibold text-white text-shadow-[0px_0px_10px_#fff]"
-                          : "text-[#808080bd] font-normal scale-[0.8] max-h-[48px]"
+                        className={`flex relative items-center justify-center text-center transition-all duration-600 text-[20px] ${i === currentIndex
+                          ? "font-semibold text-white text-shadow-[0px_0px_10px_#fff] w-full wave-text"
+                          : "text-[#808080bd] scale-[0.8] w-full max-h-[48px]"
                           }`}
+                        style={{ whiteSpace: "pre-wrap" }}
                       >
                         {line?.text || ""}
                       </div>
@@ -224,7 +244,7 @@ export default function App() {
 
           <div className="flex justify-between items-center mt-2">
             <div>
-              <h3 className="w-[270px] text-[35px] font-bold relative leading-[35px] truncate mt-3">{personalized.title ? personalized.title : musicDetails?.title?.split(" ").slice(0, 3).join(" ")}</h3>
+              <h3 className="w-[270px] text-[35px] text-white font-bold relative leading-[35px] truncate mt-3">{personalized.title ? personalized.title : musicDetails?.title?.split(" ").slice(0, 3).join(" ")}</h3>
 
               <div className="flex items-center relative">
                 <p className={`text-[15px] font-semibold`} style={{ color: detailsColor }}>{personalized.artistName ? personalized.artistName : musicDetails?.artist}</p>
@@ -233,9 +253,9 @@ export default function App() {
             </div>
 
             <div className="flex items-center">
-              <div className="flex items-center gap-2 bg-[#6f6f6f]/15 rounded-full px-5 py-[3px]">
+              <div className="flex items-center gap-2 bg-[#6f6f6f]/15 rounded-full px-5 py-[5px]">
                 <img className="w-[10px]" src="/icons/bluetooth.png" alt="bluetooth icon" />
-                <span className="text-[#E8E8E8] font-thin text-[12px] mt-1">LM02</span>
+                <span className="text-white font-thin text-[14px]">Bunns</span>
               </div>
             </div>
           </div>
@@ -263,18 +283,18 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center gap-6 text-[#dddddd] text-xl">
+              <div className="flex justify-between items-center gap-6 text-white text-xl">
                 <button>
                   <Shuffle />
                 </button>
                 <button>
-                  <SkipBack className="h-8 w-8 fill-[#dddddd]" />
+                  <SkipBack className="h-8 w-8 fill-white" />
                 </button>
                 <button onClick={() => setPlaying(!playing)} className="text-2xl cursor-pointer">
-                  {playing ? <Pause className="h-12 w-12 fill-[#dddddd]" /> : <Play className="h-12 w-12 fill-[#dddddd]" />}
+                  {playing ? <Pause className="h-12 w-12 fill-white" /> : <Play className="h-12 w-12 fill-white" />}
                 </button>
                 <button>
-                  <SkipForward className="h-8 w-8 fill-[#dddddd]" />
+                  <SkipForward className="h-8 w-8 fill-white" />
                 </button>
                 <button>
                   <Repeat />
@@ -282,7 +302,7 @@ export default function App() {
               </div>
 
               <div className="mt-5 flex items-center justify-between">
-                <Volume1 className="h-5 w-5 fill-[#dddddd] mr-3" />
+                <Volume1 className="h-5 w-5 fill-white mr-3" />
 
                 <input
                   type="range"

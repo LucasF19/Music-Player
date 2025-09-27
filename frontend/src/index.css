@@ -49,3 +49,13 @@ body {
 .spin-slow {
   animation: spin-slow 20s linear infinite;
 }
+
+.wave-text {
+  animation: wave 0.2s ease-in-out;
+}
+
+@keyframes wave {
+  0% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
