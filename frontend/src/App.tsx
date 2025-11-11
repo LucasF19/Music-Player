@@ -7,15 +7,15 @@ import { fetchSongDetails, getLyrics, searchSong } from "./services/albumInfo.js
 import { isDarkColor, lightenColor } from "./utils/colorContrast.js";
 
 const personalized = {
-  id: "9249219",
+  id: "12047892",
   title: "",
-  color: "",
+  color: "#5bb4c2ff",
   albumName: "",
-  artistName: "",
-  customLyrics: false,
+  artistName: "d4vd, Hyunjin",
+  customLyrics: true,
   showFilter: false,
-  delay: 41,
-  backgroundImage: "",
+  delay: -0.4,
+  backgroundImage: "https://images2.alphacoders.com/139/thumb-1920-1393077.jpg",
   isCustomVideo: false,
   customVideoUrl: "",
   videoStart: 0,
@@ -28,7 +28,7 @@ export default function App() {
   const [playing, setPlaying] = useState(true);
   const [playedSeconds, setPlayedSeconds] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(0.8);
+  const [volume, setVolume] = useState(0.9);
 
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -116,8 +116,21 @@ export default function App() {
   }, []);
 
   return (
-    <div className="relative h-[100vh] w-full flex items-center justify-center">
-      <div className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url('${personalized.backgroundImage ? personalized.backgroundImage : musicDetails?.albumThumb}')` }} />
+    <div className="relative h-[100vh] w-full flex items-center justify-center overflow-hidden">
+      {
+        Array.from({ length: 50 }).map((_, index) => (
+          <div className="shooting-star z-20" key={index}></div>
+        ))
+      }
+
+      <div
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat overflow-hidden"
+        style={{
+          backgroundImage: `url('${personalized.backgroundImage ? personalized.backgroundImage : musicDetails?.albumThumb}')`,
+        }}
+      >
+        <div className="absolute inset-0 animate-heatWaves pointer-events-none" />
+      </div>
 
       <div className="absolute inset-0 z-10 bg-black/80 backdrop-blur-md" />
       {
@@ -158,7 +171,7 @@ export default function App() {
       }
 
       <div className="relative z-20 scale-[1.6]">
-        <div className="w-[450px] backdrop-blur-md bg-[#171717d4] px-[25px] py-[22px] rounded-[20px]">
+        <div className="w-[450px] backdrop-blur-md bg-[#171717d4] px-[25px] py-[22px] rounded-[20px] overflow-hidden">
           <div className="flex justify-center items-center bg-[#6f6f6f]/15 rounded-[15px] py-1.5 mb-[15px] bg-opacity-[15%]">
             <span
               className={`h-[17px] font-bold text-sm text-shadow-[0px_0px_8px_#67a9ff59]`}
@@ -168,10 +181,10 @@ export default function App() {
             </span>
           </div>
 
-          <div className="relative overflow-hidden h-[450px] rounded-[15px]" style={{ boxShadow: `0px 0px 20px ${detailsColor}19` }}>
+          <div className="relative overflow-hidden h-[450px] rounded-[15px]">
 
             <div className="bg-black w-full h-full z-10">
-              <div className="absolute top-0 left-0 w-full h-full scale-[2.3] origin-center opacity-40">
+              <div className="absolute top-0 left-0 w-full h-full scale-[2] origin-center opacity-40">
                  <ReactPlayer
                     ref={playerRef}
                     url={musicDetails?.url}
@@ -185,7 +198,7 @@ export default function App() {
                     onDuration={(dur) => setDuration(dur)}
                     config={{
                       playerVars: {
-                        autoplay: 0,
+                        autoplay: 1,
                         modestbranding: 0,
                         controls: 0,
                         rel: 0,
@@ -211,24 +224,24 @@ export default function App() {
                     )
                   }
               </div>
-              <div className="absolute inset-0 z-10 backdrop-blur-[3px]" />
+              <div className="absolute inset-0 z-10 backdrop-blur-[2px]" />
             </div>
 
 
-            <div className="absolute inset-0 z-20 overflow-visible flex items-center justify-center">
-              <div className="h-full w-full overflow-visible relative flex items-center justify-center">
+            <div className="absolute inset-0 z-20 overflow-visible flex items-stretch justify-center">
+              <div className="h-full w-full overflow-visible px-[20px] relative flex items-center justify-center">
                 <div
-                  className="transition-transform ease-in-out flex flex-col items-center gap-[3px] w-[310px]"
+                  className="transition-transform ease-in-out flex flex-col items-center gap-[3px] w-full"
                 >
-                  {playedSeconds >= lyrics[0]?.time && [currentIndex - 1, currentIndex, currentIndex + 1].map((i, _) => {
+                  {playedSeconds >= lyrics[0]?.time && [currentIndex -1, currentIndex, currentIndex + 1].map((i, _) => {
                     const line = lyrics[i];
 
                     return (
                       <div
                         key={i}
-                        className={`flex relative items-center justify-center text-center transition-all duration-600 text-[20px] ${i === currentIndex
-                          ? "font-semibold text-white text-shadow-[0px_0px_10px_#fff] w-full wave-text"
-                          : "text-[#808080bd] scale-[0.8] w-full max-h-[48px]"
+                        className={`flex relative items-center justify-center text-center font-semibold transition-all h-full duration-600 text-[20px] ${i === currentIndex
+                          ? "text-white text-shadow-[0px_0px_10px_#fff] wave-text"
+                          : "text-[#808080bd] scale-[0.8] h-[48px] whitespace-nowrap"
                           }`}
                         style={{ whiteSpace: "pre-wrap" }}
                       >

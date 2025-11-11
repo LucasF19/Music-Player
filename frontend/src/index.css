@@ -51,11 +51,10 @@ body {
 }
 
 .wave-text {
-  animation: wave 0.2s ease-in-out;
+  animation: wave 0.5s ease-in-out;
 }
 
 @keyframes wave {
-  0% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+  0% { transform: translateY(-5px) }
+  100% { transform: translateY(0px) }
 }
-
