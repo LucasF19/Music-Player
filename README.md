@@ -1,6 +1,6 @@
 <div align="start">
 
-# 🎵 Player Music Lyrics
+# 🎵 Music Lyrics
 
 <p>
 Um <b>player de música personalizável</b> integrado com a <b>API do Genius</b>, desenvolvido em <b>React + Vite</b>, utilizando <b>Tailwind CSS</b> para estilização.
