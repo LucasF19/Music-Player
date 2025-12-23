@@ -63,7 +63,7 @@ O player busca automaticamente a <b>letra da música</b> e exibe tudo de forma i
 
 ### 1 Clone o repositório
 ```bash
-git clone https://github.com/seu-usuario/seu-repositorio.git
+git clone https://github.com/LucasF19/Music-Player.git
 ````
 
 ### 2 Acesse a pasta do projeto
@@ -72,7 +72,15 @@ cd seu-repositorio
 ````
 
 ### 3 Instale as dependências
+Instale as dependencias das pastas frontend e backend
+
 ```bash
+cd seu-repositorio/frontend
+npm i
+````
+
+```bash
+cd seu-repositorio/backend
 npm i
 ````
 
