@@ -87,7 +87,7 @@ npm i
 ### 4 Configure a API do Genius
 Crie um arquivo <b>.env</b> na raiz do projeto e adicione sua chave:
 ```bash
-VITE_GENIUS_API_KEY=SUA_CHAVE_AQUI
+GENIUS_API_TOKEN=SUA_CHAVE_AQUI
 ````
 
 ### 5 Inicie o servidor
